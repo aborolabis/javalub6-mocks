@@ -1,12 +1,11 @@
 package com.demo.camera;
 
-import org.assertj.core.api.Assertions;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockitoSession;
 
 public class PhotoCameraTest {
 
@@ -38,23 +37,40 @@ public class PhotoCameraTest {
 
 
     @Test
-    public void whenCameraIsTurnedOnSensorSendsData(){
+    public void pressingTheButtonSendsDataFromSensorToCardWhileCameraIsTurnedOn(){
         ImageSensor imageSensor = mock(ImageSensor.class);
-        PhotoCamera photoCamera = new PhotoCamera (imageSensor);
+        Card card = mock(Card.class);
+        PhotoCamera photoCamera = new PhotoCamera (imageSensor, card);
         photoCamera.turnOn();
         photoCamera.pressButton();
 
         Mockito.verify(imageSensor).read();
+        Mockito.verify(card).write(Mockito.any());
     }
 
     @Test
-    public void whenDataIsCurrentlySavingTurningOffTheCameraDontTurnOffTheSensor(){
+    public void whileDataIsCurrentlySavingTurningOffTheCameraDontTurnOffTheSensor(){
         ImageSensor imageSensor = mock(ImageSensor.class);
-        PhotoCamera photoCamera = new PhotoCamera (imageSensor);
+        Card card = mock(Card.class);
+        PhotoCamera photoCamera = new PhotoCamera (imageSensor, card);
         photoCamera.turnOn();
         photoCamera.pressButton();
         photoCamera.turnOff();
 
-        
+        Mockito.verify(imageSensor).turnOn();
     }
+
+    @Test
+    public void whenDataSavingFinishSensorStopsWorking(){
+        ImageSensor imageSensor = mock(ImageSensor.class);
+        Card card = mock(Card.class);
+        PhotoCamera photoCamera = new PhotoCamera (imageSensor, card);
+        photoCamera.turnOn();
+        photoCamera.pressButton();
+        photoCamera.turnOff();
+        photoCamera.writeCompleted();
+
+        Mockito.verify(imageSensor).turnOff();
+    }
+
 }
